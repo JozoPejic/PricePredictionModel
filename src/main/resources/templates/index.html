@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Price Prediction</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #e6edf5;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 45px 55px;
+            border-radius: 16px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+            max-width: 750px;
+            width: 90%;
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            color: #2c3e50;
+            font-size: 3em;
+            margin-bottom: 20px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        p {
+            font-size: 1.1em;
+            line-height: 1.7;
+            margin-bottom: 40px;
+            color: #5f6c7e;
+            font-weight: 300;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            font-size: 1.05em;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background-color: #4a90e2;
+            color: #ffffff;
+            box-shadow: 0 6px 20px rgba(74, 144, 226, 0.3);
+        }
+
+        .btn-primary:hover {
+            background-color: #357ABD;
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(74, 144, 226, 0.4);
+        }
+
+        .btn-secondary {
+            background-color: #e2e8f0;
+            color: #4a5568;
+            border: 1px solid #cbd5e0;
+        }
+
+        .btn-secondary:hover {
+            background-color: #d1d9e0;
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        .background-effect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .circle {
+            position: absolute;
+            background: rgba(74, 144, 226, 0.05);
+            border-radius: 50%;
+            animation: moveCircles 25s infinite ease-in-out alternate;
+        }
+
+        .circle:nth-child(1) { width: 120px; height: 120px; top: 15%; left: 10%; animation-delay: 0s; }
+        .circle:nth-child(2) { width: 180px; height: 180px; top: 65%; left: 85%; animation-delay: 5s; }
+        .circle:nth-child(3) { width: 90px; height: 90px; top: 35%; left: 3%; animation-delay: 10s; }
+        .circle:nth-child(4) { width: 140px; height: 140px; top: 25%; left: 75%; animation-delay: 15s; }
+        .circle:nth-child(5) { width: 80px; height: 80px; top: 75%; left: 25%; animation-delay: 20s; }
+        .circle:nth-child(6) { width: 100px; height: 100px; top: 5%; right: 5%; animation-delay: 25s; }
+
+        @keyframes moveCircles {
+            0% { transform: translate(0, 0) scale(1); opacity: 0.05; }
+            50% { transform: translate(70px, -70px) scale(1.05); opacity: 0.08; }
+            100% { transform: translate(0, 0) scale(1); opacity: 0.05; }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.2em;
+            }
+            p {
+                font-size: 0.95em;
+            }
+            .button-group {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .btn {
+                width: 80%;
+                margin: 0 auto;
+            }
+            .container {
+                padding: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="background-effect">
+    <div class="circle"></div>
+    <div class="circle"></div>
+    <div class="circle"></div>
+    <div class="circle"></div>
+    <div class="circle"></div>
+    <div class="circle"></div>
+</div>
+
+<div class="container">
+    <h1>Welcome to Stock Insights</h1>
+    <p>
+        **Predict stock price movements using the power of news sentiment!** Our platform leverages advanced models to
+        analyze the sentiment of financial news, providing you with unique insights.
+        Select your favorite stocks, **train models** based on relevant news, and gain an edge in optimizing your investment decisions.
+    </p>
+    <div class="button-group">
+        <a href="/login" class="btn btn-primary">Login</a>
+        <a href="/register" class="btn btn-secondary">Register</a>
+    </div>
+</div>
+</body>
+</html>

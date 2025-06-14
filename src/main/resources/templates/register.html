@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Registration</title>
+    <meta charset="UTF-8" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --primary-blue: #4a90e2;
+            --primary-blue-dark: #357ABD;
+            --light-gray-bg: #e6edf5;
+            --white: #ffffff;
+            --text-dark: #2c3e50;
+            --text-medium: #5f6c7e;
+            --border-light: #cbd5e0;
+            --shadow-light: rgba(0, 0, 0, 0.08);
+            --success-bg: #d4edda;
+            --success-text: #155724;
+            --error-bg: #f8d7da;
+            --error-text: #721c24;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--light-gray-bg);
+            color: var(--text-dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background-color: var(--white);
+            padding: 30px 40px;
+            border-radius: 10px;
+            box-shadow: 0 8px 25px var(--shadow-light);
+            width: 100%;
+            max-width: 420px;
+            box-sizing: border-box;
+        }
+
+        h2 {
+            color: var(--primary-blue);
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 2em;
+            font-weight: 700;
+        }
+
+        input[type="email"],
+        input[type="password"],
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 15px;
+            margin: 10px 0;
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 1em;
+            color: var(--text-dark);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        input[type="email"]:focus,
+        input[type="password"]:focus,
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+        }
+
+        button[type="submit"] {
+            background-color: var(--primary-blue);
+            color: var(--white);
+            padding: 12px 15px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+
+        button[type="submit"]:hover {
+            background-color: var(--primary-blue-dark);
+        }
+
+        button[type="submit"]:active {
+            transform: translateY(1px);
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 500;
+            display: none;
+            font-size: 0.95em;
+        }
+
+        .message.success {
+            background-color: var(--success-bg);
+            color: var(--success-text);
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background-color: var(--error-bg);
+            color: var(--error-text);
+            border: 1px solid #f5c6cb;
+        }
+
+        .link-text {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 0.95em;
+            color: var(--text-medium);
+        }
+
+        .link-text a {
+            color: var(--primary-blue);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s ease;
+        }
+
+        .link-text a:hover {
+            color: var(--primary-blue-dark);
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+
+<div class="container"> <h2>Register</h2>
+
+    <div id="message" class="message"></div>
+
+    <form id="registerForm">
+        <input type="text" id="firstName" placeholder="First Name" required />
+        <input type="text" id="lastName" placeholder="Last Name" required />
+        <input type="email" id="email" placeholder="Email" required />
+        <input type="password" id="password" placeholder="Password" required minlength="6" />
+        <button type="submit">Register</button>
+    </form>
+</div>
+
+<script>
+    const form = document.getElementById('registerForm');
+    const messageDiv = document.getElementById('message');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const data = {
+            firstName: form.firstName.value.trim(),
+            lastName: form.lastName.value.trim(),
+            email: form.email.value.trim(),
+            password: form.password.value
+        };
+
+        try {
+            const response = await fetch('/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                messageDiv.textContent = 'User registered successfully! Redirecting to login...';
+                messageDiv.className = 'message success';
+                messageDiv.style.display = 'block';
+                form.reset();
+
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 2000);
+
+            } else {
+                const errorText = await response.text();
+                messageDiv.textContent = 'Error: ' + errorText;
+                messageDiv.className = 'message error';
+                messageDiv.style.display = 'block';
+            }
+        } catch (error) {
+            messageDiv.textContent = 'Network error: ' + error.message;
+            messageDiv.className = 'message error';
+            messageDiv.style.display = 'block';
+        }
+    });
+</script>
+
+</body>
+</html>

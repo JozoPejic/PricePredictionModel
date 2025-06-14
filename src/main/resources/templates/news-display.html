@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Feed - Stock Insights</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --primary-blue: #4a90e2;
+            --primary-blue-dark: #357ABD;
+            --light-gray-bg: #e6edf5;
+            --white: #ffffff;
+            --text-dark: #2c3e50;
+            --text-medium: #5f6c7e;
+            --border-light: #cbd5e0;
+            --shadow-light: rgba(0, 0, 0, 0.08);
+            --shadow-medium: rgba(74, 144, 226, 0.3);
+
+            --sentiment-positive: #28a745;
+            --sentiment-neutral: #6c757d;
+            --sentiment-negative: #dc3545;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--light-gray-bg);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background-color: var(--white);
+            padding: 15px 40px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-brand {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: var(--primary-blue);
+            text-decoration: none;
+        }
+
+        .navbar-links {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-medium);
+            font-weight: 500;
+            font-size: 1.0em;
+            transition: color 0.2s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-blue);
+        }
+
+        .user-dropdown {
+            position: relative;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: background-color 0.2s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .user-dropdown:hover {
+            background-color: #f0f2f5;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-right: 8px;
+        }
+
+        .dropdown-icon {
+            font-size: 0.8em;
+            color: var(--text-medium);
+            transition: transform 0.2s ease;
+        }
+
+        .user-dropdown.active .dropdown-icon {
+            transform: rotate(180deg);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            background-color: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            min-width: 160px;
+            list-style: none;
+            padding: 10px 0;
+            margin: 0;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+        }
+
+        .user-dropdown.active .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            padding: 10px 20px;
+            color: var(--text-medium);
+            text-decoration: none;
+            display: block;
+            font-size: 0.95em;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--light-gray-bg);
+            color: var(--primary-blue);
+        }
+
+        .dropdown-item.logout {
+            border-top: 1px solid var(--border-light);
+            margin-top: 5px;
+            padding-top: 10px;
+            color: #e74c3c;
+        }
+        .dropdown-item.logout:hover {
+            background-color: #fce7e7;
+            color: #c0392b;
+        }
+
+        .news-feed-container {
+            flex-grow: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .news-feed-container h2 {
+            font-size: 2.2em;
+            color: var(--text-dark);
+            margin-bottom: 30px;
+            font-weight: 700;
+            text-align: center;
+            width: 100%;
+        }
+
+        .stock-news-group {
+            width: 100%;
+            margin-bottom: 40px;
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            background-color: var(--white);
+            padding: 20px;
+            box-shadow: 0 4px 15px var(--shadow-light);
+        }
+
+        .stock-news-group h3.stock-symbol {
+            font-size: 1.8em;
+            color: var(--primary-blue);
+            margin-top: 0;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--primary-blue);
+            padding-bottom: 10px;
+            text-align: left;
+        }
+
+        .news-list-for-symbol {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .news-card {
+            background-color: var(--light-gray-bg);
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            text-align: left;
+        }
+
+        .news-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .news-card h4 {
+            font-size: 1.2em;
+            color: var(--text-dark);
+            margin: 0;
+            line-height: 1.3;
+        }
+
+        .news-card p {
+            font-size: 0.95em;
+            color: var(--text-medium);
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .news-meta-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85em;
+            color: var(--text-medium);
+            margin-top: 5px;
+        }
+
+        .sentiment-score {
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 5px;
+        }
+
+        .sentiment-score.positive {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: var(--sentiment-positive);
+        }
+
+        .sentiment-score.neutral {
+            background-color: rgba(108, 117, 125, 0.1);
+            color: var(--sentiment-neutral);
+        }
+
+        .sentiment-score.negative {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: var(--sentiment-negative);
+        }
+
+        .news-card a {
+            color: var(--primary-blue);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9em;
+            align-self: flex-end;
+        }
+
+        .news-card a:hover {
+            text-decoration: underline;
+        }
+
+        .loading-message, .error-message, .no-news-message {
+            text-align: center;
+            font-size: 1.2em;
+            color: var(--text-medium);
+            margin-top: 50px;
+            width: 100%;
+        }
+        .error-message {
+            color: #e74c3c;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 15px 20px;
+            }
+            .navbar-links {
+                gap: 15px;
+            }
+            .user-name {
+                display: none;
+            }
+            .news-feed-container {
+                padding: 30px 20px;
+            }
+            .news-feed-container h2 {
+                font-size: 1.8em;
+            }
+            .stock-news-group {
+                padding: 15px;
+            }
+            .stock-news-group h3.stock-symbol {
+                font-size: 1.5em;
+            }
+            .news-card {
+                padding: 15px;
+            }
+            .news-card h4 {
+                font-size: 1.1em;
+            }
+            .news-card p {
+                font-size: 0.9em;
+            }
+            .news-meta-info {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+            .news-card a {
+                align-self: flex-start;
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <a href="/dashboard" class="navbar-brand">Stock Predictor</a>
+    <div class="navbar-links">
+        <a href="/dashboard" class="nav-link">Dashboard</a>
+        <a href="/my-followed-stocks" class="nav-link">My Stocks</a>
+        <a href="/news-display" class="nav-link">News Feed</a>
+        <a href="/admin" class="nav-link">Admin</a>
+        <div class="user-dropdown" id="userDropdown">
+            <span class="user-name" id="displayUserName"></span>
+            <span class="dropdown-icon">&#9660;</span>
+            <ul class="dropdown-menu" id="dropdownMenu">
+                <li><a href="/profile" class="dropdown-item">Profile</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a href="#" class="dropdown-item logout" id="logoutButton">Logout</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="news-feed-container">
+    <h2>Latest News from Your Followed Stocks</h2>
+    <div id="newsFeedContent">
+        <p class="loading-message">Loading news...</p>
+    </div>
+</div>
+
+<script>
+    const userDropdown = document.getElementById('userDropdown');
+    const dropdownMenu = document.getElementById('dropdownMenu');
+
+    userDropdown.addEventListener('click', (event) => {
+        event.stopPropagation();
+        userDropdown.classList.toggle('active');
+    });
+
+    document.addEventListener('click', (event) => {
+        if (!userDropdown.contains(event.target)) {
+            userDropdown.classList.remove('active');
+        }
+    });
+
+    const logoutButton = document.getElementById('logoutButton');
+    logoutButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        localStorage.removeItem('jwtToken');
+        window.location.href = '/login';
+    });
+
+    function parseJwt(token) {
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(jsonPayload);
+        } catch (e) {
+            console.error("Error parsing JWT:", e);
+            return null;
+        }
+    }
+
+    const displayUserName = document.getElementById('displayUserName');
+    const jwtToken = localStorage.getItem('jwtToken');
+
+    if (jwtToken) {
+        const decodedToken = parseJwt(jwtToken);
+        if (decodedToken && decodedToken.firstName) {
+            displayUserName.textContent = decodedToken.firstName;
+        } else if (decodedToken && decodedToken.sub) {
+            displayUserName.textContent = decodedToken.sub.split('@')[0];
+        } else {
+            displayUserName.textContent = "User";
+        }
+    } else {
+        displayUserName.textContent = "Guest";
+    }
+
+    const newsFeedContent = document.getElementById('newsFeedContent');
+
+    function formatDateTime(isoString) {
+        if (!isoString) return 'N/A';
+        try {
+            const date = new Date(isoString);
+            const options = {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            };
+            return date.toLocaleString('en-US', options);
+        } catch (e) {
+            console.error("Error formatting date:", isoString, e);
+            return isoString;
+        }
+    }
+
+    function getSentimentClass(score) {
+        if (score > 0.3) return 'positive';
+        if (score < -0.3) return 'negative';
+        return 'neutral';
+    }
+
+    async function fetchNews() {
+        newsFeedContent.innerHTML = '<p class="loading-message">Loading news...</p>';
+
+        const token = localStorage.getItem('jwtToken');
+        if (!token) {
+            newsFeedContent.innerHTML = '<p class="error-message">You are not logged in. Please <a href="/login">log in</a> to view news.</p>';
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/news/display-news', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                if (response.status === 401 || response.status === 403) {
+                    newsFeedContent.innerHTML = '<p class="error-message">Authentication failed. Please <a href="/login">log in</a> again.</p>';
+                    localStorage.removeItem('jwtToken');
+                } else {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP error! Status: ${response.status} - ${errorText}`);
+                }
+                return;
+            }
+
+            const allNews = await response.json();
+
+            newsFeedContent.innerHTML = '';
+
+            if (allNews.length === 0) {
+                newsFeedContent.innerHTML = '<p class="no-news-message">No news found for your followed stocks.</p>';
+                return;
+            }
+
+            const groupedNews = {};
+            allNews.forEach(newsItem => {
+                if (newsItem.ticker) {
+                    if (!groupedNews[newsItem.ticker]) {
+                        groupedNews[newsItem.ticker] = [];
+                    }
+                    groupedNews[newsItem.ticker].push(newsItem);
+                }
+            });
+
+            const sortedTickers = Object.keys(groupedNews).sort();
+
+            if (sortedTickers.length === 0) {
+                newsFeedContent.innerHTML = '<p class="no-news-message">No news found for your followed stocks with valid tickers.</p>';
+                return;
+            }
+
+            sortedTickers.forEach(symbol => {
+                const newsForSymbol = groupedNews[symbol];
+
+                const stockGroupDiv = document.createElement('div');
+                stockGroupDiv.className = 'stock-news-group';
+
+                const symbolHeader = document.createElement('h3');
+                symbolHeader.className = 'stock-symbol';
+                symbolHeader.textContent = `${symbol.toUpperCase()} News`;
+                stockGroupDiv.appendChild(symbolHeader);
+
+                const newsListForSymbolDiv = document.createElement('div');
+                newsListForSymbolDiv.className = 'news-list-for-symbol';
+
+                newsForSymbol.forEach(newsItem => {
+                    const newsCard = document.createElement('div');
+                    newsCard.className = 'news-card';
+
+                    const title = document.createElement('h4');
+                    title.textContent = newsItem.title;
+
+                    const summaryContainer = document.createElement('div');
+                    summaryContainer.className = 'summary-container';
+
+                    const summaryText = document.createElement('p');
+                    summaryText.className = 'summary-text';
+
+                    const fullSummary = newsItem.summary || '';
+                    const MAX_SUMMARY_LENGTH = 250;
+
+                    if (fullSummary.length > MAX_SUMMARY_LENGTH) {
+                        summaryText.textContent = fullSummary.substring(0, MAX_SUMMARY_LENGTH) + '...';
+
+                        const toggleButton = document.createElement('button');
+                        toggleButton.className = 'read-more-toggle';
+                        toggleButton.textContent = 'Read More';
+
+                        toggleButton.addEventListener('click', () => {
+                            if (summaryText.classList.contains('expanded')) {
+                                summaryText.textContent = fullSummary.substring(0, MAX_SUMMARY_LENGTH) + '...';
+                                summaryText.classList.remove('expanded');
+                                toggleButton.textContent = 'Read More';
+                            } else {
+                                summaryText.textContent = fullSummary;
+                                summaryText.classList.add('expanded');
+                                toggleButton.textContent = 'Show Less';
+                            }
+                        });
+                        summaryContainer.appendChild(summaryText);
+                        summaryContainer.appendChild(toggleButton);
+                    } else {
+                        summaryText.textContent = fullSummary;
+                        summaryContainer.appendChild(summaryText);
+                    }
+
+
+                    const metaInfo = document.createElement('div');
+                    metaInfo.className = 'news-meta-info';
+
+                    const sentimentSpan = document.createElement('span');
+                    const score = newsItem.overall_sentiment_score;
+                    sentimentSpan.textContent = `Sentiment: ${score !== null && score !== undefined ? score.toFixed(2) : 'N/A'}`;
+                    sentimentSpan.className = `sentiment-score ${getSentimentClass(score)}`;
+
+                    const timeSpan = document.createElement('span');
+                    timeSpan.textContent = `Published: ${formatDateTime(newsItem.date)}`;
+
+                    metaInfo.appendChild(sentimentSpan);
+                    metaInfo.appendChild(timeSpan);
+
+
+                    newsCard.appendChild(title);
+                    newsCard.appendChild(summaryContainer);
+                    newsCard.appendChild(metaInfo);
+
+                    if (newsItem.url) {
+                        const readMoreLink = document.createElement('a');
+                        readMoreLink.href = newsItem.url;
+                        readMoreLink.textContent = 'Read Full Article';
+                        readMoreLink.target = '_blank';
+                        newsCard.appendChild(readMoreLink);
+                    }
+                    newsListForSymbolDiv.appendChild(newsCard);
+                });
+                stockGroupDiv.appendChild(newsListForSymbolDiv);
+                newsFeedContent.appendChild(stockGroupDiv);
+            });
+
+        } catch (error) {
+            console.error('Error fetching news:', error);
+            newsFeedContent.innerHTML = `<p class="error-message">Failed to load news. Please try again later. (${error.message})</p>`;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', fetchNews);
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Stocks - Stock Insights</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --primary-blue: #4a90e2;
+            --primary-blue-dark: #357ABD;
+            --light-gray-bg: #e6edf5;
+            --white: #ffffff;
+            --text-dark: #2c3e50;
+            --text-medium: #5f6c7e;
+            --border-light: #cbd5e0;
+            --shadow-light: rgba(0, 0, 0, 0.08);
+            --shadow-medium: rgba(74, 144, 226, 0.3);
+            --success-color: #28a745;
+            --error-color: #dc3545;
+            --info-color: #17a2b8;
+            --warning-color: #ffc107;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--light-gray-bg);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background-color: var(--white);
+            padding: 15px 40px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-brand {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: var(--primary-blue);
+            text-decoration: none;
+        }
+
+        .navbar-links {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .navbar-links a {
+            text-decoration: none;
+            color: var(--text-medium);
+            font-weight: 500;
+            font-size: 1.0em;
+            transition: color 0.2s ease;
+        }
+
+        .navbar-links a:hover {
+            color: var(--primary-blue);
+        }
+
+        .user-dropdown {
+            position: relative;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: background-color 0.2s ease;
+            display: flex;
+            align-items: center;
+            margin-left: 20px;
+        }
+
+        .user-dropdown:hover {
+            background-color: #f0f2f5;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-right: 8px;
+        }
+
+        .dropdown-icon {
+            font-size: 0.8em;
+            color: var(--text-medium);
+            transition: transform 0.2s ease;
+        }
+
+        .user-dropdown.active .dropdown-icon {
+            transform: rotate(180deg);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            background-color: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            min-width: 160px;
+            list-style: none;
+            padding: 10px 0;
+            margin: 0;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+        }
+
+        .user-dropdown.active .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            padding: 10px 20px;
+            color: var(--text-medium);
+            text-decoration: none;
+            display: block;
+            font-size: 0.95em;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--light-gray-bg);
+            color: var(--primary-blue);
+        }
+
+        .dropdown-item.logout {
+            border-top: 1px solid var(--border-light);
+            margin-top: 5px;
+            padding-top: 10px;
+            color: var(--error-color);
+        }
+        .dropdown-item.logout:hover {
+            background-color: #fce7e7;
+            color: #c0392b;
+        }
+        .dropdown-divider {
+            border: none;
+            border-top: 1px solid var(--border-light);
+            margin: 5px 0;
+        }
+
+        .container {
+            flex-grow: 1;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 30px;
+            background-color: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px var(--shadow-light);
+        }
+
+        h2 {
+            text-align: center;
+            color: var(--text-dark);
+            margin-bottom: 30px;
+            font-size: 2.2em;
+            font-weight: 700;
+        }
+
+        .search-section, .my-current-stocks {
+            margin-bottom: 40px;
+            padding: 25px;
+            border: 1px solid var(--border-light);
+            border-radius: 10px;
+            background-color: var(--light-gray-bg);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
+        .my-current-stocks {
+            margin-bottom: 0;
+        }
+
+        h3 {
+            margin-top: 0;
+            color: var(--primary-blue);
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        #stockSearchInput {
+            width: calc(100% - 24px);
+            padding: 12px;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            font-size: 1em;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        #stockSearchInput:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+        }
+
+        .search-results, #myPortfolioList {
+            max-height: 350px;
+            overflow-y: auto;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            background-color: var(--white);
+        }
+
+        .search-result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 18px;
+            border-bottom: 1px solid #f0f2f5;
+            font-size: 0.95em;
+            transition: background-color 0.2s ease;
+        }
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+        .search-result-item:hover {
+            background-color: #f7f9fa;
+        }
+
+        .search-result-item span {
+            flex-grow: 1;
+            margin-right: 15px;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+        .search-result-item span strong {
+            color: var(--primary-blue);
+        }
+
+        .add-button {
+            background-color: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+        }
+        .add-button:hover {
+            background-color: var(--primary-blue-dark);
+            transform: translateY(-1px);
+        }
+        .add-button:active {
+            transform: translateY(0);
+        }
+
+        .action-button {
+            color: white;
+            border: none;
+            padding: 7px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 500;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            margin-left: 8px;
+        }
+        .action-button:hover {
+            transform: translateY(-1px);
+        }
+        .action-button:active {
+            transform: translateY(0);
+        }
+
+        .train-button {
+            background-color: var(--warning-color);
+            color: var(--text-dark);
+        }
+        .train-button:hover {
+            background-color: #e0a800;
+        }
+        .predict-button {
+            background-color: var(--info-color);
+        }
+        .predict-button:hover {
+            background-color: #138496;
+        }
+        .remove-button {
+            background-color: var(--error-color);
+        }
+        .remove-button:hover {
+            background-color: #c82333;
+        }
+
+        .no-results, .loading-message, .error-message {
+            padding: 20px;
+            text-align: center;
+            color: var(--text-medium);
+            font-style: italic;
+        }
+        .error-message {
+            color: var(--error-color);
+            font-weight: 500;
+        }
+        .loading-message {
+            color: var(--primary-blue);
+            font-weight: 500;
+        }
+
+        .message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: 500;
+            text-align: center;
+            width: calc(100% - 30px);
+            box-sizing: border-box;
+            display: none;
+        }
+        .message.success {
+            background-color: #d4edda;
+            color: var(--success-color);
+            border: 1px solid #c3e6cb;
+        }
+        .message.error {
+            background-color: #f8d7da;
+            color: var(--error-color);
+            border: 1px solid #f5c6cb;
+        }
+        .message.info {
+            background-color: #d1ecf1;
+            color: var(--info-color);
+            border: 1px solid #bee5eb;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 15px 20px;
+            }
+            .navbar-links {
+                gap: 15px;
+            }
+            .user-dropdown {
+                margin-left: 10px;
+            }
+            .user-name {
+                display: none;
+            }
+            .container {
+                margin: 20px auto;
+                padding: 20px;
+            }
+            h2 {
+                font-size: 1.8em;
+            }
+            .search-section, .my-current-stocks {
+                padding: 15px;
+            }
+            h3 {
+                font-size: 1.3em;
+            }
+            #stockSearchInput {
+                width: calc(100% - 20px);
+                padding: 10px;
+            }
+            .search-result-item {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 10px 15px;
+            }
+            .search-result-item span {
+                margin-bottom: 8px;
+                margin-right: 0;
+            }
+            .search-result-item button.add-button,
+            .search-result-item div {
+                width: 100%;
+                text-align: right;
+            }
+            .action-button {
+                margin-left: 0;
+                margin-top: 5px;
+                width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <a href="/dashboard" class="navbar-brand">Stock Insights</a>
+    <div class="navbar-links">
+        <a href="/dashboard">Dashboard</a>
+        <a href="/my-stocks">My Stocks</a>
+        <a href="/news-feed">News Feed</a>
+        <a href="/admin" class="nav-link">Admin</a>
+        <a href="#" id="logoutButton">Logout</a>
+    </div>
+</div>
+
+<div class="container">
+    <h2>My Stocks Portfolio</h2>
+    <div class="search-section">
+        <h3>Search & Add Stocks</h3>
+        <input type="text" id="stockSearchInput" placeholder="Enter stock symbol or company name (e.g., AAPL, Apple)" />
+        <div id="searchResults" class="search-results">
+            <div class="no-results">Start typing to search for stocks...</div>
+        </div>
+        <div id="statusMessage" class="message" style="display: none;"></div>
+    </div>
+
+    <div class="my-current-stocks">
+        <h3>My Current Portfolio</h3>
+        <div id="myPortfolioList">
+            <p class="no-results">Loading your stocks...</p>
+        </div>
+        <div id="portfolioStatusMessage" class="message" style="display: none;"></div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('logoutButton').addEventListener('click', (e) => {
+        e.preventDefault();
+        localStorage.removeItem('jwtToken');
+        localStorage.removeItem('userFirstName');
+        localStorage.removeItem('userLastName');
+        window.location.href = '/login';
+    });
+
+    const stockSearchInput = document.getElementById('stockSearchInput');
+    const searchResultsDiv = document.getElementById('searchResults');
+    const statusMessageDiv = document.getElementById('statusMessage');
+    const myPortfolioListDiv = document.getElementById('myPortfolioList');
+    const portfolioStatusMessageDiv = document.getElementById('portfolioStatusMessage');
+
+    let searchTimeout;
+
+    function showStatusMessage(message, type, targetDiv = statusMessageDiv) {
+        targetDiv.textContent = message;
+        targetDiv.className = `message ${type}`;
+        targetDiv.style.display = 'block';
+        setTimeout(() => {
+            targetDiv.style.display = 'none';
+        }, 3000);
+    }
+
+    stockSearchInput.addEventListener('input', () => {
+        clearTimeout(searchTimeout);
+        const query = stockSearchInput.value.trim();
+
+        if (query.length < 2) {
+            searchResultsDiv.innerHTML = '<div class="no-results">Start typing to search for stocks...</div>';
+            return;
+        }
+
+        searchResultsDiv.innerHTML = '<div class="loading-message">Searching...</div>';
+
+        searchTimeout = setTimeout(async () => {
+            try {
+                const jwtToken = localStorage.getItem('jwtToken');
+                if (!jwtToken) {
+                    showStatusMessage('You are not logged in.', 'error');
+                    searchResultsDiv.innerHTML = '<div class="error-message">Not authenticated.</div>';
+                    return;
+                }
+
+                const response = await fetch(`/api/stocks/search?query=${encodeURIComponent(query)}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${jwtToken}`
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.text();
+                    searchResultsDiv.innerHTML = `<div class="error-message">Error: ${errorData || 'Failed to fetch search results.'}</div>`;
+                    console.error('Search API error:', response.status, errorData);
+                    return;
+                }
+
+                const data = await response.json();
+                searchResultsDiv.innerHTML = '';
+
+                if (data && data.length > 0) {
+                    data.forEach(stock => {
+                        const resultItem = document.createElement('div');
+                        resultItem.className = 'search-result-item';
+                        resultItem.innerHTML = `
+                            <span><strong>${stock.symbol}</strong> - ${stock.name || ''} (${stock.currency || ''})</span>
+                            <button class="add-button" data-symbol="${stock.symbol}" data-name="${stock.name || ''}">Add</button>
+                        `;
+                        searchResultsDiv.appendChild(resultItem);
+                    });
+                } else {
+                    searchResultsDiv.innerHTML = '<div class="no-results">No stocks found matching your query.</div>';
+                }
+
+            } catch (error) {
+                console.error('Network or parsing error:', error);
+                searchResultsDiv.innerHTML = '<div class="error-message">A network error occurred or response was invalid.</div>';
+            }
+        }, 500);
+    });
+
+    searchResultsDiv.addEventListener('click', async (event) => {
+        if (event.target.classList.contains('add-button')) {
+            const symbol = event.target.dataset.symbol;
+            const name = event.target.dataset.name;
+            const jwtToken = localStorage.getItem('jwtToken');
+
+            if (!jwtToken) {
+                showStatusMessage('You are not logged in. Please log in to add stocks.', 'error');
+                return;
+            }
+
+            showStatusMessage(`Adding '${name}' (${symbol})...`, 'info');
+
+            try {
+                const response = await fetch(`/api/portfolio/add/${symbol}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${jwtToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    showStatusMessage(`'${name}' (${symbol}) added successfully!`, 'success');
+                    fetchMyPortfolio();
+                } else {
+                    const errorData = await response.text();
+                    showStatusMessage(`Failed to add '${name}' (${symbol}): ${errorData}`, 'error');
+                    console.error('Add stock API error:', response.status, errorData);
+                }
+            } catch (error) {
+                showStatusMessage(`Network error while adding '${name}' (${symbol}).`, 'error');
+                console.error('Network error adding stock:', error);
+            }
+        }
+    });
+
+    async function fetchMyPortfolio() {
+        const jwtToken = localStorage.getItem('jwtToken');
+        if (!jwtToken) {
+            showStatusMessage('You are not logged in. Please log in to view your portfolio.', 'error', portfolioStatusMessageDiv);
+            myPortfolioListDiv.innerHTML = '<div class="error-message">Not authenticated.</div>';
+            return;
+        }
+
+        myPortfolioListDiv.innerHTML = '<div class="loading-message">Loading your portfolio...</div>';
+
+        try {
+            const response = await fetch('/api/portfolio', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${jwtToken}`
+                }
+            });
+
+            if (!response.ok) {
+                const errorData = await response.text();
+                myPortfolioListDiv.innerHTML = `<div class="error-message">Error loading portfolio: ${errorData || 'Unknown error.'}</div>`;
+                console.error('Portfolio API error:', response.status, errorData);
+                return;
+            }
+
+            const stocks = await response.json();
+            myPortfolioListDiv.innerHTML = '';
+
+            if (stocks && stocks.length > 0) {
+                stocks.forEach(stock => {
+                    const stockItemDiv = document.createElement('div');
+                    stockItemDiv.className = 'search-result-item';
+                    stockItemDiv.innerHTML = `
+                        <span><strong>${stock.symbol}</strong></span>
+                        <div>
+                            <button class="action-button remove-button" data-symbol="${stock.symbol}">Remove</button>
+                        </div>
+                    `;
+                    myPortfolioListDiv.appendChild(stockItemDiv);
+                });
+            } else {
+                myPortfolioListDiv.innerHTML = '<div class="no-results">You are not following any stocks yet. Add some above!</div>';
+            }
+        } catch (error) {
+            console.error('Network or parsing error:', error);
+            myPortfolioListDiv.innerHTML = '<div class="error-message">A network error occurred while loading your portfolio.</div>';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', fetchMyPortfolio);
+
+    myPortfolioListDiv.addEventListener('click', async (event) => {
+        const target = event.target;
+        if (target.tagName === 'BUTTON') {
+            const symbol = target.dataset.symbol;
+            if (target.classList.contains('remove-button')) {
+                showStatusMessage(`Removing ${symbol}...`, 'info', portfolioStatusMessageDiv);
+                await sendRemoveRequest(symbol);
+            }
+        }
+    });
+
+    async function sendRemoveRequest(symbol) {
+        const jwtToken = localStorage.getItem('jwtToken');
+        if (!jwtToken) { showStatusMessage('Not authenticated.', 'error', portfolioStatusMessageDiv); return; }
+        try {
+            const response = await fetch(`/api/portfolio/remove/${symbol}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${jwtToken}` }
+            });
+
+            const result = await response.text();
+            if (response.ok) {
+                showStatusMessage(`Stock ${symbol} removed.`, 'success', portfolioStatusMessageDiv);
+                fetchMyPortfolio();
+            } else {
+                showStatusMessage(`Failed to remove ${symbol}: ${result}`, 'error', portfolioStatusMessageDiv);
+                console.error('Remove API error:', response.status, result);
+            }
+        } catch (error) {
+            showStatusMessage(`Network error during removal of ${symbol}.`, 'error', portfolioStatusMessageDiv);
+            console.error('Network error during remove request:', error);
+        }
+    }
+
+</script>
+
+</body>
+</html>

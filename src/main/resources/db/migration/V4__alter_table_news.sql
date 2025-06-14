@@ -1,0 +1,2 @@
+ALTER TABLE IF EXISTS news ALTER COLUMN overall_sentiment_label TYPE VARCHAR(30);
+ALTER TABLE IF EXISTS news ALTER COLUMN ticker_sentiment_label TYPE VARCHAR(30);

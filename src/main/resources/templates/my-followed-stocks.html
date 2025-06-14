@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Stock Portfolio - Stock Insights</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --primary-blue: #4a90e2;
+            --primary-blue-dark: #357ABD;
+            --light-gray-bg: #e6edf5;
+            --white: #ffffff;
+            --text-dark: #2c3e50;
+            --text-medium: #5f6c7e;
+            --border-light: #cbd5e0;
+            --shadow-light: rgba(0, 0, 0, 0.08);
+            --shadow-medium: rgba(74, 144, 226, 0.3);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--light-gray-bg);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background-color: var(--white);
+            padding: 15px 40px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-brand {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: var(--primary-blue);
+            text-decoration: none;
+        }
+
+        .navbar-links {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-medium);
+            font-weight: 500;
+            font-size: 1.0em;
+            transition: color 0.2s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-blue);
+        }
+
+        .user-dropdown {
+            position: relative;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: background-color 0.2s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .user-dropdown:hover {
+            background-color: #f0f2f5;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-right: 8px;
+        }
+
+        .dropdown-icon {
+            font-size: 0.8em;
+            color: var(--text-medium);
+            transition: transform 0.2s ease;
+        }
+
+        .user-dropdown.active .dropdown-icon {
+            transform: rotate(180deg);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            background-color: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            min-width: 160px;
+            list-style: none;
+            padding: 10px 0;
+            margin: 0;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+        }
+
+        .user-dropdown.active .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            padding: 10px 20px;
+            color: var(--text-medium);
+            text-decoration: none;
+            display: block;
+            font-size: 0.95em;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--light-gray-bg);
+            color: var(--primary-blue);
+        }
+
+        .dropdown-item.logout {
+            border-top: 1px solid var(--border-light);
+            margin-top: 5px;
+            padding-top: 10px;
+            color: #e74c3c;
+        }
+        .dropdown-item.logout:hover {
+            background-color: #fce7e7;
+            color: #c0392b;
+        }
+
+        .container {
+            flex-grow: 1;
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 30px;
+            background-color: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 4px 15px var(--shadow-light);
+        }
+        h1 {
+            color: var(--primary-blue);
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+            font-weight: 700;
+        }
+        .stock-list-container {
+            margin-top: 20px;
+        }
+        .stock-item {
+            border: 1px solid var(--border-light);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            background-color: #fdfdfd;
+            display: flex;
+            flex-direction: column;
+        }
+        .stock-item h3 {
+            margin-top: 0;
+            color: var(--text-dark);
+            font-size: 1.6em;
+            margin-bottom: 15px;
+            text-align: left;
+            border-bottom: 2px solid var(--primary-blue);
+            padding-bottom: 10px;
+        }
+        .stock-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px 20px;
+            margin-bottom: 15px;
+        }
+        .stock-details div {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .stock-details strong {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+        .stock-details span {
+            color: var(--text-medium);
+            text-align: right;
+        }
+
+        .stock-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding-top: 15px;
+            border-top: 1px dashed var(--border-light);
+        }
+        .action-button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+        .action-button:active {
+            transform: translateY(1px);
+        }
+        .train-button {
+            background-color: #ffc107;
+            color: var(--text-dark);
+        }
+        .train-button:hover {
+            background-color: #e0a800;
+        }
+        .predict-button {
+            background-color: #17a2b8;
+            color: var(--white);
+        }
+        .predict-button:hover {
+            background-color: #138496;
+        }
+        .evaluate-button {
+            background-color: #6c757d;
+            color: var(--white);
+        }
+        .evaluate-button:hover {
+            background-color: #5a6268;
+        }
+
+        .refresh-button {
+            background-color: var(--primary-blue);
+            color: var(--white);
+            margin: 20px auto 30px auto;
+            display: block;
+            padding: 12px 20px;
+            font-size: 1.1em;
+            border-radius: 8px;
+            width: fit-content;
+        }
+        .refresh-button:hover {
+            background-color: var(--primary-blue-dark);
+        }
+
+        #message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: 500;
+            text-align: center;
+            display: none;
+        }
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .message.info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .message.warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+
+        .loader {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-top: 4px solid var(--primary-blue);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 40px auto;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #emptyPortfolioMessage {
+            text-align: center;
+            color: var(--text-medium);
+            font-style: italic;
+            padding: 20px;
+            background-color: #f0f4f8;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 15px 20px;
+            }
+            .navbar-links {
+                gap: 15px;
+            }
+            .user-name {
+                display: none;
+            }
+            .container {
+                padding: 30px 20px;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+            .stock-list-container {
+                margin-top: 15px;
+            }
+            .stock-item {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+            .stock-item h3 {
+                font-size: 1.4em;
+                margin-bottom: 10px;
+            }
+            .stock-details {
+                grid-template-columns: 1fr;
+                gap: 5px;
+            }
+            .stock-details div {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .stock-details strong {
+                width: 100%;
+                text-align: left;
+            }
+            .stock-details span {
+                width: 100%;
+                text-align: left;
+            }
+            .stock-actions {
+                flex-direction: column;
+                gap: 10px;
+                padding-top: 10px;
+            }
+            .action-button {
+                width: 100%;
+                margin-left: 0;
+            }
+            .refresh-button {
+                padding: 10px 15px;
+                font-size: 1em;
+            }
+            #message {
+                width: 100%;
+                margin: 15px auto;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <a href="/dashboard" class="navbar-brand">Stock Predictor</a>
+    <div class="navbar-links">
+        <a href="/dashboard" class="nav-link">Dashboard</a>
+        <a href="/my-followed-stocks" class="nav-link">My Stocks</a>
+        <a href="/news-display" class="nav-link">News Feed</a>
+        <a href="/admin" class="nav-link" id="adminLink" style="display: none;">Admin</a>
+
+        <div class="user-dropdown" id="userDropdown">
+            <span class="user-name" id="displayUserName"></span>
+            <span class="dropdown-icon">&#9660;</span>
+            <ul class="dropdown-menu" id="dropdownMenu">
+                <li><a href="/profile" class="dropdown-item">Profile</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a href="#" class="dropdown-item logout" id="logoutButton">Logout</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <h1>My Stock Portfolio</h1>
+
+    <button onclick="fetchAndDisplayPortfolio()" class="refresh-button">Refresh Portfolio</button>
+    <div id="loader" class="loader"></div>
+    <div id="message" class="message"></div>
+
+    <div id="portfolioList" class="stock-list-container">
+        <p id="emptyPortfolioMessage" style="display: none;">
+            Your portfolio is empty or no stocks could be retrieved. Add some stocks from the "My Stocks" page!
+        </p>
+    </div>
+</div>
+
+<script>
+    const userDropdown = document.getElementById('userDropdown');
+    const dropdownMenu = document.getElementById('dropdownMenu');
+    const logoutButton = document.getElementById('logoutButton');
+    const displayUserName = document.getElementById('displayUserName');
+
+    function parseJwt(token) {
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(jsonPayload);
+        } catch (e) {
+            console.error("Error parsing JWT:", e);
+            return null;
+        }
+    }
+
+    const jwtToken = localStorage.getItem('jwtToken');
+    if (jwtToken) {
+        const decodedToken = parseJwt(jwtToken);
+        if (decodedToken && decodedToken.firstName) {
+            displayUserName.textContent = decodedToken.firstName;
+        } else if (decodedToken && decodedToken.sub) {
+            displayUserName.textContent = decodedToken.sub.split('@')[0];
+        } else {
+            displayUserName.textContent = "User";
+        }
+    } else {
+        displayUserName.textContent = "Guest";
+    }
+
+    userDropdown.addEventListener('click', (event) => {
+        event.stopPropagation();
+        userDropdown.classList.toggle('active');
+    });
+
+    document.addEventListener('click', (event) => {
+        if (!userDropdown.contains(event.target)) {
+            userDropdown.classList.remove('active');
+        }
+    });
+
+    logoutButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        localStorage.removeItem('jwtToken');
+        localStorage.removeItem('userFirstName');
+        localStorage.removeItem('userLastName');
+        localStorage.removeItem('userEmail');
+        window.location.href = '/login';
+    });
+
+    const portfolioListElement = document.getElementById('portfolioList');
+    const messageElement = document.getElementById('message');
+    const loaderElement = document.getElementById('loader');
+    const emptyPortfolioMessageElement = document.getElementById('emptyPortfolioMessage');
+
+    function showMessage(type, text) {
+        messageElement.className = `message ${type}`;
+        messageElement.textContent = text;
+        messageElement.style.display = 'block';
+        setTimeout(() => {
+            messageElement.style.display = 'none';
+        }, 10000);
+    }
+
+    function showLoader(show) {
+        loaderElement.style.display = show ? 'block' : 'none';
+    }
+
+    async function fetchAndDisplayPortfolio() {
+        portfolioListElement.innerHTML = '';
+        messageElement.style.display = 'none';
+        emptyPortfolioMessageElement.style.display = 'none';
+
+        showLoader(true);
+
+        const token = localStorage.getItem('jwtToken');
+        if (!token) {
+            showLoader(false);
+            showMessage('error', 'You are not logged in. Please log in to view your portfolio.');
+            setTimeout(() => window.location.href = '/login', 2000);
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/portfolio/details`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                if (response.status === 401 || response.status === 403) {
+                    showMessage('error', 'Unauthorized: Please log in or check your permissions.');
+                    localStorage.removeItem('jwtToken');
+                    setTimeout(() => window.location.href = '/login', 2000);
+                } else {
+                    showMessage('error', `Failed to load portfolio: ${errorText || response.statusText}`);
+                }
+                showLoader(false);
+                return;
+            }
+
+            const stockPriceList = await response.json();
+
+            if (stockPriceList && stockPriceList.length > 0) {
+                stockPriceList.forEach(stock => {
+                    const stockItemDiv = document.createElement('div');
+                    stockItemDiv.className = 'stock-item';
+
+                    stockItemDiv.innerHTML = `
+                        <h3>${stock.symbol || 'N/A'}</h3>
+                        <div class="stock-details">
+                            <div><strong>Date:</strong> <span>${stock.date ? new Date(stock.date).toLocaleDateString() : 'N/A'}</span></div>
+                            <div><strong>Open:</strong> <span>${stock.open ? stock.open.toFixed(2) : 'N/A'}</span></div>
+                            <div><strong>High:</strong> <span>${stock.high ? stock.high.toFixed(2) : 'N/A'}</span></div>
+                            <div><strong>Low:</strong> <span>${stock.low ? stock.low.toFixed(2) : 'N/A'}</span></div>
+                            <div><strong>Close:</strong> <span>${stock.close ? stock.close.toFixed(2) : 'N/A'}</span></div>
+                            <div><strong>Volume:</strong> <span>${stock.volume ? stock.volume.toLocaleString() : 'N/A'}</span></div>
+                        </div>
+                        <div class="stock-actions">
+                            <button class="action-button train-button" data-symbol="${stock.symbol}">Train Model</button>
+                            <button class="action-button predict-button" data-symbol="${stock.symbol}">Predict</button>
+                            <button class="action-button evaluate-button" data-symbol="${stock.symbol}">Evaluate Model</button> </div>
+                    `;
+                    portfolioListElement.appendChild(stockItemDiv);
+                });
+                showMessage('success', `Successfully loaded ${stockPriceList.length} stocks from your portfolio.`);
+            } else {
+                emptyPortfolioMessageElement.style.display = 'block';
+                showMessage('info', 'Your portfolio is empty or no market data could be retrieved for your stocks.');
+            }
+
+        } catch (error) {
+            console.error('Error fetching portfolio details:', error);
+            showMessage('error', `Failed to load portfolio: ${error.message}. Please check server logs.`);
+        } finally {
+            showLoader(false);
+        }
+    }
+
+    async function sendTrainRequest(symbol) {
+        showMessage('info', `Combining news sentiment with stock prices for ${symbol}... This might take a moment.`);
+        const token = localStorage.getItem('jwtToken');
+        if (!token) { showMessage('error', 'Not authenticated for training.'); return; }
+
+        try {
+            const combineResponse = await fetch(`/api/stocks/combine-data/${symbol}`, {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!combineResponse.ok) {
+                const combineErrorText = await combineResponse.text();
+                if (combineResponse.status === 401 || combineResponse.status === 403) {
+                    showMessage('error', 'Authentication failed during data combination. Please log in again.');
+                    localStorage.removeItem('jwtToken');
+                    setTimeout(() => { window.location.href = '/login'; }, 2000);
+                } else {
+                    showMessage('error', `Failed to combine data for ${symbol}: ${combineErrorText}`);
+                    console.error('Combine Data API error:', combineResponse.status, combineErrorText);
+                }
+                return;
+            }
+
+            showMessage('info', `Data combined successfully for ${symbol}. Now sending for training...`);
+
+            const sendResponse = await fetch(`/api/stocks/send-data/${symbol}`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+            });
+
+            const sendResultText = await sendResponse.text();
+            if (sendResponse.ok) {
+                showMessage('success', `Training for ${symbol} finished: ${sendResultText}`);
+            } else {
+                if (sendResponse.status === 401 || sendResponse.status === 403) {
+                    showMessage('error', 'Authentication failed during training data submission. Please log in again.');
+                    localStorage.removeItem('jwtToken');
+                    setTimeout(() => { window.location.href = '/login'; }, 2000);
+                } else {
+                    showMessage('error', `Failed to train for ${symbol}: ${sendResultText}`);
+                    console.error('Train API error:', sendResponse.status, sendResultText);
+                }
+            }
+        } catch (error) {
+            showMessage('error', `Network error during training process for ${symbol}: ${error.message}`);
+            console.error('Network error during train request:', error);
+        }
+    }
+
+    async function sendPredictRequest(symbol) {
+        showMessage('info', `Predicting for ${symbol}...`);
+        const token = localStorage.getItem('jwtToken');
+        if (!token) { showMessage('error', 'Not authenticated for prediction.'); return; }
+
+        try {
+            const response = await fetch(`/api/stocks/get-prediction-data/${symbol}`, {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                let predictionMessage = `Prediction for ${symbol}: `;
+
+                if (data && typeof data.prediction !== 'undefined') {
+                    if (data.prediction === 0) {
+                        predictionMessage += "The price is predicted to **go down** or stay stable.";
+                        showMessage('info', predictionMessage);
+                    } else if (data.prediction === 1) {
+                        predictionMessage += "The price is predicted to **go up**!";
+                        showMessage('success', predictionMessage);
+                    } else {
+                        predictionMessage += `Unexpected prediction value: ${data.prediction}.`;
+                        showMessage('warning', predictionMessage);
+                    }
+                } else {
+                    predictionMessage = `Failed to get a clear prediction for ${symbol}. Response: ${JSON.stringify(data)}`;
+                    showMessage('error', predictionMessage);
+                }
+            } else {
+                const errorText = await response.text();
+                showMessage('error', `Failed to get prediction for ${symbol}: ${errorText}`);
+                console.error('Predict API error:', response.status, errorText);
+            }
+        } catch (error) {
+            showMessage('error', `Network error during prediction for ${symbol}: ${error.message}`);
+            console.error('Network error during predict request:', error);
+        }
+    }
+
+    async function sendEvaluateRequest(symbol) {
+        showMessage('info', `Evaluating model for ${symbol}... This might take a moment.`);
+        const token = localStorage.getItem('jwtToken');
+        if (!token) { showMessage('error', 'Not authenticated for evaluation.'); return; }
+
+        try {
+            const response = await fetch(`/api/evaluate/${symbol}`, {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (response.ok) {
+                const evaluationResult = await response.text();
+                showMessage('success', `Evaluation for ${symbol}: ${evaluationResult}`);
+            } else {
+                const errorText = await response.text();
+                showMessage('error', `Failed to evaluate model for ${symbol}: ${errorText}`);
+                console.error('Evaluate API error:', response.status, errorText);
+            }
+        } catch (error) {
+            showMessage('error', `Network error during evaluation for ${symbol}: ${error.message}`);
+            console.error('Network error during evaluate request:', error);
+        }
+    }
+
+    portfolioListElement.addEventListener('click', async (event) => {
+        const target = event.target;
+        if (target.tagName === 'BUTTON') {
+            const symbol = target.dataset.symbol;
+            if (target.classList.contains('train-button')) {
+                await sendTrainRequest(symbol);
+            } else if (target.classList.contains('predict-button')) {
+                await sendPredictRequest(symbol);
+            } else if (target.classList.contains('evaluate-button')) {
+                await sendEvaluateRequest(symbol);
+            }
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', fetchAndDisplayPortfolio);
+</script>
+
+</body>
+</html>
