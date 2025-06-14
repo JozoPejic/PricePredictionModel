@@ -37,7 +37,10 @@ Evaluate:
 
 
 Predict:
-
+After clicking predict, the backend fetches today's price and news data, combines it into json
+and sends it to microservice, where's the previously trained model for that particular stock
+(by previously trained I mean when the user adds the stocks, the data is automatically fetched 
+and sent for training the model), and the microservice returns if it will go up or down.
 ![image](https://github.com/user-attachments/assets/876107c4-c681-4239-bdd9-61f87abf765d)
 
 And last but not least, the user can edit his profile:
